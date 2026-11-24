@@ -1,4 +1,4 @@
-###﻿ Bicycle Rental Management System 
+###﻿Bicycle Rental Management System 
 Understanding
 Convert the starter .NET 10 console project into a Windows Forms bicycle rental management system using SQLite and an MVC-style separation. Implement the supplied requirements for authentication, role permissions, customers, bicycles, rentals, configurable hourly prices, payments, receipts, and reports.
 
