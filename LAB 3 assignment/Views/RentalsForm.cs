@@ -1,0 +1,12 @@
+using LAB_3_assignment.Data;
+using LAB_3_assignment.Models;
+using LAB_3_assignment.Services;
+
+namespace LAB_3_assignment.Views;
+public sealed class RentalsForm : Form
+{
+    readonly Repository repo; readonly DataGridView grid = Ui.Grid();
+    public RentalsForm(Repository repo) { this.repo = repo; Text = "Rentals"; Width = 1000; Height = 500; var top = new FlowLayoutPanel { Dock = DockStyle.Top, Height = 42 }; top.Controls.Add(Ui.Button("New rental", (_, _) => NewRental())); top.Controls.Add(Ui.Button("Return bicycle", (_, _) => { if (grid.CurrentRow?.DataBoundItem is Rental r) { repo.ReturnBicycle(r.Id); MessageBox.Show("Bicycle marked available."); } })); Controls.Add(grid); Controls.Add(top); RefreshGrid(); }
+    void RefreshGrid() => grid.DataSource = repo.GetRentals();
+    void NewRental() { var customers = repo.GetCustomers(); var bicycles = repo.GetAvailableBicycles(); if (!customers.Any() || !bicycles.Any()) { MessageBox.Show("A customer and an available bicycle are required."); return; } using var f = new Form { Text = "New rental", Width = 500, Height = 300, StartPosition = FormStartPosition.CenterParent }; var t = new TableLayoutPanel { Dock = DockStyle.Fill, Padding = new Padding(15), RowCount = 5, ColumnCount = 2 }; t.Controls.Add(new Label { Text = "Customer" }, 0, 0); var customer = new ComboBox { DataSource = customers, DisplayMember = "Name", Dock = DockStyle.Fill }; t.Controls.Add(customer, 1, 0); t.Controls.Add(new Label { Text = "Bicycle" }, 0, 1); var bicycle = new ComboBox { DataSource = bicycles, DisplayMember = "Code", Dock = DockStyle.Fill }; t.Controls.Add(bicycle, 1, 1); var start = Ui.Input("Start hour", f, 2, t); var end = Ui.Input("End hour", f, 3, t); t.Controls.Add(Ui.Button("Calculate and confirm", (_, _) => { try { if (!RentalValidation.TryValidate(start.Text, end.Text, out var startHour, out var endHour, out var error)) throw new ArgumentException(error); var total = new PriceService(repo).Calculate(startHour, endHour); if (MessageBox.Show($"Total price: {total:N0} RWF\nConfirm rental?", "Price", MessageBoxButtons.YesNo) == DialogResult.Yes) { repo.AddRental(((Customer)customer.SelectedItem!).Id, ((Bicycle)bicycle.SelectedItem!).Id, startHour, endHour, total); f.DialogResult = DialogResult.OK; } } catch (Exception ex) { Ui.Error(ex); } }), 1, 4); f.Controls.Add(t); if (f.ShowDialog(this) == DialogResult.OK) RefreshGrid(); }
+}

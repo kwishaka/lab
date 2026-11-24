@@ -1,0 +1,23 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Build output
+[Bb]in/
+[Oo]bj/
+
+# Test results
+TestResults/
+*.trx
+
+# Local database files
+*.db
+*.db-shm
+*.db-wal
+
+# User-specific IDE files
+*.userprefs
+
+# Docker local overrides
+docker-compose.override.yml
